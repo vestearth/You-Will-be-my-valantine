@@ -6,16 +6,12 @@ const content = document.querySelector('.content');
 
 // Make the "No" button move away when mouse hovers over it
 noBtn.addEventListener('mouseenter', function() {
-    // Get the button's current position
-    const container = document.querySelector('.buttons');
-    const containerRect = container.getBoundingClientRect();
+    // Calculate random position within viewport, accounting for button size
+    const maxX = Math.max(20, document.documentElement.clientWidth - noBtn.offsetWidth - 20);
+    const maxY = Math.max(20, document.documentElement.clientHeight - noBtn.offsetHeight - 20);
     
-    // Calculate random position within viewport
-    const maxX = window.innerWidth - noBtn.offsetWidth - 40;
-    const maxY = window.innerHeight - noBtn.offsetHeight - 40;
-    
-    const randomX = Math.random() * maxX;
-    const randomY = Math.random() * maxY;
+    const randomX = 20 + Math.random() * (maxX - 20);
+    const randomY = 20 + Math.random() * (maxY - 20);
     
     // Position the button absolutely and move it
     noBtn.style.position = 'fixed';
@@ -24,6 +20,7 @@ noBtn.addEventListener('mouseenter', function() {
 });
 
 // Handle "Yes" button click
+let heartsInterval = null;
 yesBtn.addEventListener('click', function() {
     content.style.display = 'none';
     successMessage.classList.remove('hidden');
@@ -33,15 +30,25 @@ yesBtn.addEventListener('click', function() {
 });
 
 // Create floating hearts for celebration
+let heartCount = 0;
+const maxHearts = 50; // Limit total hearts to prevent memory issues
+
 function createFloatingHearts() {
     const hearts = ['💕', '💖', '💗', '💓', '💝', '❤️', '💘'];
     
-    setInterval(() => {
+    heartsInterval = setInterval(() => {
+        // Stop creating hearts after reaching the limit
+        if (heartCount >= maxHearts) {
+            clearInterval(heartsInterval);
+            return;
+        }
+        
+        heartCount++;
         const heart = document.createElement('div');
         heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
         heart.style.position = 'fixed';
-        heart.style.left = Math.random() * window.innerWidth + 'px';
-        heart.style.top = window.innerHeight + 'px';
+        heart.style.left = Math.random() * document.documentElement.clientWidth + 'px';
+        heart.style.top = document.documentElement.clientHeight + 'px';
         heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
         heart.style.opacity = '0.8';
         heart.style.pointerEvents = 'none';

@@ -4,6 +4,14 @@ const noBtn = document.getElementById('noBtn');
 const successMessage = document.getElementById('successMessage');
 const content = document.querySelector('.content');
 
+// Crying emoji element and timeout (reused to avoid duplicates)
+let cryElement = null;
+let cryTimeout = null;
+// Yes button scale state
+let yesScale = 1;
+const yesMaxScale = 1.8;
+const yesScaleStep = 0.06;
+
 // Make the "No" button move away when mouse hovers over it
 noBtn.addEventListener('mouseenter', function() {
     // Calculate random position within viewport, accounting for button size
@@ -15,8 +23,15 @@ noBtn.addEventListener('mouseenter', function() {
     
     // Position the button absolutely and move it
     noBtn.style.position = 'fixed';
+    // Create a crying emoji at the button's current position, then move the button
+    const rect = noBtn.getBoundingClientRect();
+    createCry(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
     noBtn.style.left = randomX + 'px';
     noBtn.style.top = randomY + 'px';
+    // Grow the Yes button a bit each time No moves
+    yesScale = Math.min(yesMaxScale, yesScale + yesScaleStep);
+    yesBtn.style.setProperty('--scale', yesScale);
 });
 
 // Handle "Yes" button click
@@ -83,3 +98,35 @@ noBtn.addEventListener('touchstart', function(e) {
     e.preventDefault();
     noBtn.dispatchEvent(new Event('mouseenter'));
 });
+
+// Create a crying emoji at (x, y) and animate it upward/fade out
+function createCry(x, y) {
+    if (cryElement) {
+        cryElement.remove();
+        cryElement = null;
+        clearTimeout(cryTimeout);
+    }
+
+    cryElement = document.createElement('div');
+    cryElement.textContent = '😭';
+    cryElement.className = 'cry-emoji';
+    cryElement.style.left = x + 'px';
+    cryElement.style.top = y + 'px';
+    cryElement.style.transform = 'translate(-50%, 0)';
+    cryElement.style.opacity = '1';
+    document.body.appendChild(cryElement);
+
+    // Force reflow to ensure transition runs
+    void cryElement.offsetWidth;
+
+    // Animate upward and fade
+    cryElement.style.transform = 'translate(-50%, -60px)';
+    cryElement.style.opacity = '0';
+
+    cryTimeout = setTimeout(() => {
+        if (cryElement) {
+            cryElement.remove();
+            cryElement = null;
+        }
+    }, 900);
+}
